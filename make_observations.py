@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from loguru import logger
 from stix2 import DomainName, File, IPv4Address
 from stix2 import (ObjectPath, EqualityComparisonExpression, ObservationExpression,
@@ -13,6 +14,7 @@ from stix2 import (TimestampConstant, HashConstant, ObjectPath, EqualityComparis
                    AndBooleanExpression, WithinQualifier, RepeatQualifier, StartStopQualifier,
                    QualifiedObservationExpression, FollowedByObservationExpression,
                    ParentheticalExpression, ObservationExpression)
+from stix2 import (ObservedData)
 from stix2patterns.validator import run_validator
 from stix2patterns.v21.pattern import Pattern
 
@@ -28,7 +30,7 @@ def make_patterns():
     patterns["state_1"] = ObservationExpression(EqualityComparisonExpression(lhs, "site.of.interest.zaz"))
     print("statement 1\t{}\n".format(patterns["state_1"]))
 
-    lhs = ObjectPath("file", ["parent_directory_ref","path"])
+    lhs = ObjectPath("file", ["parent_directory_ref", "path"])
     patterns["state_2"] = ObservationExpression(EqualityComparisonExpression(lhs, "C:\\Windows\\System32"))
     print("statement 2\t{}\n".format(patterns["state_2"]))
 
@@ -39,7 +41,8 @@ def make_patterns():
 
     # IsSubset Comparison expressions
     lhs = ObjectPath("network-traffic", ["src_ref", "value"])
-    patterns["state_4"] = ObservationExpression(IsSubsetComparisonExpression(lhs, StringConstant("2001:0db8:85a3:0000:0000:8a2e:0370:7334/64")))
+    patterns["state_4"] = ObservationExpression(
+        IsSubsetComparisonExpression(lhs, StringConstant("2001:0db8:85a3:0000:0000:8a2e:0370:7334/64")))
     print("statement 4\t{}\n".format(patterns["state_4"]))
 
     # Compound Observation Expressions
@@ -61,7 +64,8 @@ def make_patterns():
 
     # ( AND ) OR ( OR ) observation
     ece20 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["name"]), "foo.dll"))
-    ece21 = ObservationExpression(EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\system\bar\foo"))
+    ece21 = ObservationExpression(
+        EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\system\bar\foo"))
     ece22 = EqualityComparisonExpression(ObjectPath("process", ["name"]), "fooproc")
     ece23 = EqualityComparisonExpression(ObjectPath("process", ["name"]), "procfoo")
     # NOTE: we need to use AND/OR observation expression instead of just boolean
@@ -72,15 +76,19 @@ def make_patterns():
     print("statement 8 (AND,OR,OR) \n{}\n".format(patterns["state_8"]))
 
     # FOLLOWED-BY
-    ece10 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["hashes", "SHA-256"]), HashConstant("fe90a7e910cb3a4739bed9180e807e93fa70c90f25a8915476f5e4bfbac681db", "SHA-256")))
-    ece11 = ObservationExpression(EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\\system\\bar\\foo"))
+    ece10 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["hashes", "SHA-256"]), HashConstant(
+        "fe90a7e910cb3a4739bed9180e807e93fa70c90f25a8915476f5e4bfbac681db", "SHA-256")))
+    ece11 = ObservationExpression(
+        EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\\system\\bar\\foo"))
     patterns["state_9"] = FollowedByObservationExpression([ece10, ece11])
     print("statement 9 (FollowedBy) \n{}\n".format(patterns["state_9"]))
 
     # Qualified Observation Expressions
     # WITHIN
-    ece10 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["hashes", "SHA-256"]), HashConstant("fe90a7e910cb3a4739bed9180e807e93fa70c90f25a8915476f5e4bfbac681db", "SHA-256")))
-    ece11 = ObservationExpression(EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\\system\\bar\\foo"))
+    ece10 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["hashes", "SHA-256"]), HashConstant(
+        "fe90a7e910cb3a4739bed9180e807e93fa70c90f25a8915476f5e4bfbac681db", "SHA-256")))
+    ece11 = ObservationExpression(
+        EqualityComparisonExpression(ObjectPath("win-registry-key", ["key"]), "hkey_local_machine\\system\\bar\\foo"))
     fbe = FollowedByObservationExpression([ece10, ece11])
     par = ParentheticalExpression(fbe)
     patterns["state_10"] = QualifiedObservationExpression(par, WithinQualifier(300))
@@ -89,7 +97,8 @@ def make_patterns():
     ece12 = EqualityComparisonExpression(ObjectPath("network-traffic", ["dst_ref", "type"]), "domain-name")
     ece13 = EqualityComparisonExpression(ObjectPath("network-traffic", ["dst_ref", "value"]), "example.com")
     abe2 = ObservationExpression(AndBooleanExpression([ece12, ece13]))
-    patterns["state_11"] = QualifiedObservationExpression(QualifiedObservationExpression(abe2, RepeatQualifier(5)), WithinQualifier(180))
+    patterns["state_11"] = QualifiedObservationExpression(QualifiedObservationExpression(abe2, RepeatQualifier(5)),
+                                                          WithinQualifier(180))
     print("statement 11 (REPEAT, WITHIN) \n{}\n".format(patterns["state_11"]))
     # START, STOP
     ece14 = ObservationExpression(EqualityComparisonExpression(ObjectPath("file", ["name"]), "foo.dll"))
@@ -103,13 +112,62 @@ def make_patterns():
 def make_observations():
     """
         make the observed data objects here, referencing the files in standard,
-        and saving the results in the patterns/results directory
+        and saving the results in the patterns directory
+        with a single filename observed_tests.json
     """
+    dom_id1 = "ipv4-addr--ff26c055-6336-5bc5-b98d-13d6226742dd"
+    dom_id2 = "domain-name--3c10e93f-798e-52a6-a0c1-08156efab7f5"
+    em1 = "email-addr--98f25ea8-d6ef-51e9-8fce-6a29236436ed"
+    em2 = "email-addr--e4ee5301-b52d-59cd-a8fa-7630838c7194"
+    em3 = "email-message--72b7698f-10c2-565a-a2a6-b4996a2f2265"
+    fba1 = "file--e277603e-1060-5ad4-9937-c26c97f1ca68"
+    fbp1 = "directory--93c0a9b0-520d-545d-9094-1a08ddf46b05"
+    fbp2 = "file--5a27d487-c542-5f97-a131-a8866b477b46"
+    fbin1 = "file--fb0419a8-f09c-57f8-be64-71a80417591c"
+    net1 = "ipv6-addr--1e61d36c-a16c-53b7-a80f-2a00161c96b1"
+    net2 = "network-traffic--c95e972a-20a4-5307-b00d-b8393faf02c5"
+    url1 = "url--c1477287-23ac-5971-a010-5c287877fa60"
+    wrk1 = "windows-registry-key--2ba37ae7-2745-5082-9dfd-9486dad41016"
+
+    dt = datetime.now()
+    ts1 = datetime.timestamp(dt)
+    ts2 = ts1 + 100
+    ts3 = ts1 + 400
+    tstz1 = datetime.fromtimestamp(ts1, tz=None)
+    tstz2 = datetime.fromtimestamp(ts2, tz=None)
+    tstz3 = datetime.fromtimestamp(ts3, tz=None)
+
+    obs_list = []
+
+    obs_list[0] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[dom_id1, dom_id2])
+    obs_list[1] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[em1, em2, em3])
+    obs_list[2] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[dom_id1, dom_id2])
+    obs_list[3] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[fba1, fba1])
+    obs_list[4] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[fbp1, fbp2])
+    obs_list[5] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[dom_id1, dom_id2])
+    obs_list[6] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[fbin1])
+    obs_list[7] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[net1, dom_id2])
+    obs_list[8] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[dom_id1, net2])
+    obs_list[9] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                               object_refs=[url1])
+    obs_list[10] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
+                                object_refs=[wrk1])
 
 
 def make_example_dicts():
     """
         process the patterns here in order to create the dicts that described them
+        and thensave them in the patterns/results directory, with the filename=dict key,
+        so state_1.json etc.
     """
     patterns = make_patterns()
 

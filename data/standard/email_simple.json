@@ -23,4 +23,7 @@
     "date": "1997-11-21T15:55:06.000Z",      
     "subject": "Conference Info"
   }
-]
+    ]
+    em1 = "email-addr--98f25ea8-d6ef-51e9-8fce-6a29236436ed"
+    em2 = "email-addr--e4ee5301-b52d-59cd-a8fa-7630838c7194"
+    em3 = "email-message--72b7698f-10c2-565a-a2a6-b4996a2f2265"

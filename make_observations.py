@@ -15,8 +15,10 @@ from stix2 import (TimestampConstant, HashConstant, ObjectPath, EqualityComparis
                    QualifiedObservationExpression, FollowedByObservationExpression,
                    ParentheticalExpression, ObservationExpression)
 from stix2 import (ObservedData)
+from stix2 import Bundle
 from stix2patterns.validator import run_validator
 from stix2patterns.v21.pattern import Pattern
+import pathlib
 
 
 def make_patterns():
@@ -161,6 +163,15 @@ def make_observations():
                                object_refs=[url1])
     obs_list[10] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
                                 object_refs=[wrk1])
+
+    # create a bundle to save the observation data
+    folder = pathlib.Path(__file__).resolve().parent
+    folder = folder/"data"/"bundles"
+    folder.mkdir(parents=True, exist_ok=True)
+    obs_bundle = Bundle(obs_list, allow_custom=False)
+    file_path = folder/"observations.json"
+    with open(file_path,'w') as file:
+        file.write(obs_bundle.serialize())
 
 
 def make_example_dicts():

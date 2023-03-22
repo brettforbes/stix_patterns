@@ -133,11 +133,11 @@ def make_observations():
     ts1 = datetime.timestamp(dt)
     ts2 = ts1 + 100
     ts3 = ts1 + 400
-    tstz1 = datetime.fromtimestamp(ts1, tz=None)
-    tstz2 = datetime.fromtimestamp(ts2, tz=None)
-    tstz3 = datetime.fromtimestamp(ts3, tz=None)
+    ts1 = datetime.fromtimestamp(ts1, tz=None)
+    ts2 = datetime.fromtimestamp(ts2, tz=None)
+    ts3 = datetime.fromtimestamp(ts3, tz=None)
 
-    obs_list = []
+    obs_list = [None]*11
 
     obs_list[0] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
                                object_refs=[dom_id1, dom_id2])

@@ -7,6 +7,7 @@ name = "pypi"
 stix2 = "*"
 stix2-patterns = "*"
 loguru = "*"
+dendrol = "*"
 
 [dev-packages]
 

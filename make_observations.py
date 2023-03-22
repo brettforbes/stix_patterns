@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
-from loguru import logger
+import logging
+
 from stix2 import DomainName, File, IPv4Address
 from stix2 import (ObjectPath, EqualityComparisonExpression, ObservationExpression,
                    GreaterThanComparisonExpression, IsSubsetComparisonExpression,
@@ -19,7 +20,7 @@ from stix2 import Bundle
 from stix2patterns.validator import run_validator
 from stix2patterns.v21.pattern import Pattern
 import pathlib
-
+from dendrol import Pattern as TreePattern
 
 def make_patterns():
     '''
@@ -172,8 +173,7 @@ def make_observations():
     file_path = folder/"observations.json"
     with open(file_path,'w') as file:
         file.write(obs_bundle.serialize())
-
-
+import pytz
 def make_example_dicts():
     """
         process the patterns here in order to create the dicts that described them
@@ -181,8 +181,30 @@ def make_example_dicts():
         so state_1.json etc.
     """
     patterns = make_patterns()
+    for id in patterns.keys():
+        logging.info(f'Processing statement {id}')
+        pattern = patterns[id]
+        pattern_tree = TreePattern(str(pattern))
+        dict_tree = pattern_tree.to_dict_tree()
 
+        folder = pathlib.Path(__file__).resolve().parent
+        folder = folder / "data" / "parsetrees"
+        folder.mkdir(parents=True, exist_ok=True)
+        file_path = folder / f"{id}.yml"
+
+        logging.info('Writing parse tree as YAML')
+        with open(file_path, 'w') as file:
+            if id =='state_12':
+                #TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
+                start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
+                start_stop['start']=start_stop['start'].replace(tzinfo=pytz.utc)
+                start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
+                dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
+                file.write(dict_tree.serialize())
+            else:
+                file.write(dict_tree.serialize())
 
 # if this file is run directly, then start here
 if __name__ == '__main__':
     make_observations()
+    make_example_dicts()

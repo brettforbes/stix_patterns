@@ -1,5 +1,6 @@
+import pytz
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 from stix2 import DomainName, File, IPv4Address
@@ -21,6 +22,7 @@ from stix2patterns.validator import run_validator
 from stix2patterns.v21.pattern import Pattern
 import pathlib
 from dendrol import Pattern as TreePattern
+
 
 def make_patterns():
     '''
@@ -132,38 +134,45 @@ def make_observations():
     url1 = "url--c1477287-23ac-5971-a010-5c287877fa60"
     wrk1 = "windows-registry-key--2ba37ae7-2745-5082-9dfd-9486dad41016"
 
-    dt = datetime.now()
-    ts1 = datetime.timestamp(dt)
-    ts2 = ts1 + 100
-    ts3 = ts1 + 400
-    ts1 = datetime.fromtimestamp(ts1, tz=None)
-    ts2 = datetime.fromtimestamp(ts2, tz=None)
-    ts3 = datetime.fromtimestamp(ts3, tz=None)
+    ts1 = datetime.now()
+    ts2 = ts1 + timedelta(seconds=100)
+    ts3 = ts1 + timedelta(seconds=400)
 
-    obs_list = [None]*11
+    obs_list = []
 
-    obs_list[0] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[1] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[em1, em2, em3])
-    obs_list[2] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[3] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fba1, fba1])
-    obs_list[4] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fbp1, fbp2])
-    obs_list[5] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[6] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fbin1])
-    obs_list[7] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[net1, dom_id2])
-    obs_list[8] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, net2])
-    obs_list[9] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[url1])
-    obs_list[10] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                                object_refs=[wrk1])
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[em1, em2, em3])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fba1, fba1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fbp1, fbp2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fbin1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[net1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, net2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[url1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[wrk1])
+    )
 
     # create a bundle to save the observation data
     folder = pathlib.Path(__file__).resolve().parent
@@ -171,9 +180,10 @@ def make_observations():
     folder.mkdir(parents=True, exist_ok=True)
     obs_bundle = Bundle(obs_list, allow_custom=False)
     file_path = folder/"observations.json"
-    with open(file_path,'w') as file:
+    with open(file_path, 'w') as file:
         file.write(obs_bundle.serialize())
-import pytz
+
+
 def make_example_dicts():
     """
         process the patterns here in order to create the dicts that described them
@@ -194,10 +204,10 @@ def make_example_dicts():
 
         logging.info('Writing parse tree as YAML')
         with open(file_path, 'w') as file:
-            if id =='state_12':
-                #TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
+            if id == 'state_12':
+                # TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
                 start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
-                start_stop['start']=start_stop['start'].replace(tzinfo=pytz.utc)
+                start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)
                 start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
                 dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
                 file.write(dict_tree.serialize())
@@ -208,15 +218,16 @@ def make_example_dicts():
 
         logging.info('Writing parse tree as dicts')
         with open(file_path, 'w') as file:
-            if id =='state_12':
-                #TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
+            if id == 'state_12':
+                # TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
                 start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
-                start_stop['start']=start_stop['start'].replace(tzinfo=pytz.utc)
+                start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)
                 start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
                 dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
                 json.dump(dict_tree['pattern'], file)
             else:
                 json.dump(dict_tree['pattern'], file)
+
 
 # if this file is run directly, then start here
 if __name__ == '__main__':

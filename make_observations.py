@@ -1,6 +1,6 @@
 import pytz
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 from stix2 import DomainName, File, IPv4Address
@@ -134,38 +134,45 @@ def make_observations():
     url1 = "url--c1477287-23ac-5971-a010-5c287877fa60"
     wrk1 = "windows-registry-key--2ba37ae7-2745-5082-9dfd-9486dad41016"
 
-    dt = datetime.now()
-    ts1 = datetime.timestamp(dt)
-    ts2 = ts1 + 100
-    ts3 = ts1 + 400
-    ts1 = datetime.fromtimestamp(ts1, tz=None)
-    ts2 = datetime.fromtimestamp(ts2, tz=None)
-    ts3 = datetime.fromtimestamp(ts3, tz=None)
+    ts1 = datetime.now()
+    ts2 = ts1 + timedelta(seconds=100)
+    ts3 = ts1 + timedelta(seconds=400)
 
-    obs_list = [None]*11
+    obs_list = []
 
-    obs_list[0] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[1] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[em1, em2, em3])
-    obs_list[2] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[3] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fba1, fba1])
-    obs_list[4] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fbp1, fbp2])
-    obs_list[5] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, dom_id2])
-    obs_list[6] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[fbin1])
-    obs_list[7] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[net1, dom_id2])
-    obs_list[8] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[dom_id1, net2])
-    obs_list[9] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                               object_refs=[url1])
-    obs_list[10] = ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5,
-                                object_refs=[wrk1])
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[em1, em2, em3])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fba1, fba1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fbp1, fbp2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[fbin1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[net1, dom_id2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[dom_id1, net2])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[url1])
+    )
+    obs_list.append(
+        ObservedData(first_observed=ts1, last_observed=ts2, number_observed=5, object_refs=[wrk1])
+    )
 
     # create a bundle to save the observation data
     folder = pathlib.Path(__file__).resolve().parent

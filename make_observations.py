@@ -191,20 +191,19 @@ def make_example_dicts():
         so state_1.json etc.
     """
     patterns = make_patterns()
-    for id in patterns.keys():
-        logging.info(f'Processing statement {id}')
-        pattern = patterns[id]
+    for key, pattern in patterns.items():
+        logging.info(f'Processing statement {key}')
         pattern_tree = TreePattern(str(pattern))
         dict_tree = pattern_tree.to_dict_tree()
 
         folder = pathlib.Path(__file__).resolve().parent
         folder = folder / "data" / "parsetrees"
         folder.mkdir(parents=True, exist_ok=True)
-        file_path = folder / f"{id}.yml"
+        file_path = folder / f"{key}.yml"
 
         logging.info('Writing parse tree as YAML')
         with open(file_path, 'w') as file:
-            if id == 'state_12':
+            if key == 'state_12':
                 # TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
                 start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
                 start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)
@@ -214,11 +213,11 @@ def make_example_dicts():
             else:
                 file.write(dict_tree.serialize())
 
-        file_path = folder / f"{id}.json"
+        file_path = folder / f"{key}.json"
 
         logging.info('Writing parse tree as dicts')
         with open(file_path, 'w') as file:
-            if id == 'state_12':
+            if key == 'state_12':
                 # TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
                 start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
                 start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)

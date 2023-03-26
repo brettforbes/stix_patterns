@@ -204,6 +204,20 @@ def make_example_dicts():
             else:
                 file.write(dict_tree.serialize())
 
+        file_path = folder / f"{id}.json"
+
+        logging.info('Writing parse tree as dicts')
+        with open(file_path, 'w') as file:
+            if id =='state_12':
+                #TODO: a bit of a hack here to avoid the dreadful YAML timezone issues
+                start_stop = dict_tree['pattern']['observation']['qualifiers'][0]['start_stop']
+                start_stop['start']=start_stop['start'].replace(tzinfo=pytz.utc)
+                start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
+                dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
+                json.dump(dict_tree['pattern'], file)
+            else:
+                json.dump(dict_tree['pattern'], file)
+
 # if this file is run directly, then start here
 if __name__ == '__main__':
     make_observations()

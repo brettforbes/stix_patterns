@@ -209,9 +209,8 @@ def make_example_dicts():
                 start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)
                 start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
                 dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
-                file.write(dict_tree.serialize())
-            else:
-                file.write(dict_tree.serialize())
+
+            file.write(dict_tree.serialize())
 
         file_path = folder / f"{key}.json"
 
@@ -223,9 +222,8 @@ def make_example_dicts():
                 start_stop['start'] = start_stop['start'].replace(tzinfo=pytz.utc)
                 start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
                 dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
-                json.dump(dict_tree['pattern'], file)
-            else:
-                json.dump(dict_tree['pattern'], file)
+
+            json.dump(dict_tree['pattern'], file)
 
 
 # if this file is run directly, then start here

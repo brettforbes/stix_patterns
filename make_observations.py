@@ -184,6 +184,28 @@ def make_observations():
         file.write(obs_bundle.serialize())
 
 
+class PythonObjectEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, set):
+            return list(o)
+        elif isinstance(o, slice):
+            if o.step:
+                components = [o.start, o.stop, o.step]
+            elif o.start:
+                components = [o.start, o.stop]
+            else:
+                components = [o.stop]
+
+            slice_string = ':'.join(
+                str(comp) if comp else '' for comp in components
+            )
+            return f'[{slice_string}]'
+        elif isinstance(o, (datetime)):
+            return o.isoformat()
+
+        return json.JSONEncoder.default(self, o)
+
+
 def make_example_dicts():
     """
         process the patterns here in order to create the dicts that described them
@@ -223,7 +245,7 @@ def make_example_dicts():
                 start_stop['stop'] = start_stop['stop'].replace(tzinfo=pytz.utc)
                 dict_tree['pattern']['observation']['qualifiers'][0]['start_stop'] = start_stop
 
-            json.dump(dict_tree['pattern'], file)
+            json.dump(dict_tree['pattern'], file, cls=PythonObjectEncoder)
 
 
 # if this file is run directly, then start here

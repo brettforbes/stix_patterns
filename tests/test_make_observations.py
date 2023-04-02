@@ -1,12 +1,13 @@
+from datetime import datetime
+
 import json
 import pytest
-from datetime import datetime
 
 from ..make_observations import PythonObjectEncoder
 
 
 class TestPythonObjectEncoder():
-    """Test the custom PythonObjectEncoder can correct encode objects into json"""
+    """Test the custom PythonObjectEncoder can correctly encode objects into json"""
 
     @pytest.mark.parametrize(
         'object_input, expected_json',

@@ -185,9 +185,11 @@ def make_observations():
 
 
 class PythonObjectEncoder(json.JSONEncoder):
+    """Encoder to serialize objects into json"""
+
     def default(self, o):
         if isinstance(o, set):
-            return list(o)
+            return list(sorted(o))
         elif isinstance(o, slice):
             if o.step:
                 components = [o.start, o.stop, o.step]

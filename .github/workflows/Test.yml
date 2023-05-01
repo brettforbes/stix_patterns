@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: 'pipenv'
+      - name: Install pipenv
+        run: |
+          curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pipenv install --dev
+      - name: Test with pytest
+        run: |
+          pipenv run coverage run -m pytest
+          pipenv run coverage report -m
+      

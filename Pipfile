@@ -7,8 +7,11 @@ name = "pypi"
 stix2 = "*"
 stix2-patterns = "*"
 loguru = "*"
+dendrol = "*"
 
 [dev-packages]
+coverage = "*"
+pytest = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"
